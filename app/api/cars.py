@@ -1,39 +1,42 @@
+from audioop import add
+from math import e
+from turtle import update
 from typing import List
 
 from fastapi import APIRouter, HTTPException
 
-from app.api.models import Car
-from cars_db import fake_car_db
+from app.api.models import CarIn, CarOut, CarUpdate
+from app.api import db_manager
 
 cars = APIRouter()
 
 
-@cars.get("/", response_model=List[Car])
+@cars.get("/", response_model=List[CarOut])
 async def index():
-    return fake_car_db
+    return await db_manager.get_all_cars()
 
 
 @cars.post("/", status_code=201)
-async def add_car(payload: Car):
-    car = payload.dict()
-    fake_car_db.append(car)
-    return {"id": len(fake_car_db) - 1}
+async def add_car(payload: CarIn):
+    added_car = await db_manager.add_car(payload)
+    return {"id": added_car, **payload.dict()}
 
 
 @cars.put("/{id}")
-async def update_car(id: int, payload: Car):
-    car = payload.dict()
-    cars_length = len(fake_car_db)
-    if 0 <= id <= cars_length:
-        fake_car_db[id] = car
-        return None
-    raise HTTPException(status_code=404, detail="Car with given id not found")
+async def update_car(id: int, payload: CarIn):
+    car = await db_manager.get_car(id)
+    if not car:
+        raise HTTPException(status_code=404, detail="Car with given id not found")
+
+    updated_data = payload.dict(exclude_unset=True)
+    car_in_db = CarIn(**car)
+    updated_car = car_in_db.copy(update=updated_data)
+    return await db_manager.update_car(id, updated_car)
 
 
 @cars.delete("/{id}")
 async def delete_car(id: int):
-    cars_length = len(fake_car_db)
-    if 0 <= id <= cars_length:
-        del fake_car_db[id]
-        return None
-    raise HTTPException(status_code=404, detail="Car with given id not found")
+    car = await db_manager.get_car(id)
+    if not car:
+        raise HTTPException(status_code=404, detail="Car with given id not found")
+    return await db_manager.delete_car(id)
