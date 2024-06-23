@@ -1,12 +1,9 @@
-from audioop import add
-from math import e
-from turtle import update
 from typing import List
 
-from fastapi import APIRouter, HTTPException
-
-from app.api.models import CarIn, CarOut, CarUpdate
+from app.api.service import is_manufacturer_present
 from app.api import db_manager
+from app.api.models import CarIn, CarOut
+from fastapi import APIRouter, HTTPException
 
 cars = APIRouter()
 
@@ -18,6 +15,10 @@ async def index():
 
 @cars.post("/", status_code=201)
 async def add_car(payload: CarIn):
+    if not is_manufacturer_present(payload.manufacturer_id):
+        raise HTTPException(
+            status_code=404, detail="Manufacturer with given id not found"
+        )
     added_car = await db_manager.add_car(payload)
     return {"id": added_car, **payload.dict()}
 

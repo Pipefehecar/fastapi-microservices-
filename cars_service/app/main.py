@@ -17,4 +17,4 @@ async def shutdown():
     await database.disconnect()
 
 
-app.include_router(cars)
+app.include_router(cars, prefix='/api/v1/cars', tags=['Cars'])
