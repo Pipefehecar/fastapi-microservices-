@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+  cars_service:
+    build: ./cars_service
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./cars_service/:/app/
+    ports:
+      - 8001:8000
+    environment:
+      - DATABASE_URI=postgresql://cars_db_username:cars_db_password@cars_db/cars_db_dev
+      - MANUFACTURER_SERVICE_HOST_URL=http://manufacturer_service:8000/api/v1/manufacturer/
+    depends_on:
+      - cars_db
+
+  cars_db:
+    image: postgres:12.1-alpine
+    volumes:
+      - postgres_data_cars:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=cars_db_username
+      - POSTGRES_PASSWORD=cars_db_password
+      - POSTGRES_DB=cars_db_dev
+
+  manufacturer_service:
+    build: ./manufacturer_service
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./manufacturer_service/:/app/
+    ports:
+      - 8002:8000
+    environment:
+      - DATABASE_URI=postgresql://manufacturer_db_username:manufacturer_db_password@manufacturer_db/manufacturer_db_dev
+    depends_on:
+      - manufacturer_db
+
+  manufacturer_db:
+    image: postgres:12.1-alpine
+    volumes:
+      - postgres_data_manufacturers:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=manufacturer_db_username
+      - POSTGRES_PASSWORD=manufacturer_db_password
+      - POSTGRES_DB=manufacturer_db_dev
+
+volumes:
+  postgres_data_cars:
+  postgres_data_manufacturers:
