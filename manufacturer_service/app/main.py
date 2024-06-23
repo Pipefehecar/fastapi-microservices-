@@ -15,4 +15,4 @@ async def startup():
 async def shutdown():
     await database.disconnect()
 
-app.include_router(manufacturers, prefix='/api/v1/manufacturer', tags=['Manufacturer'])
+app.include_router(manufacturers, prefix='/api/v1/manufacturers', tags=['Manufacturer'])
