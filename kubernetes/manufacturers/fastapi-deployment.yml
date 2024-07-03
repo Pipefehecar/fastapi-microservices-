@@ -45,7 +45,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: manufacturers-service
+    app: manufacturers-microservice
   ports:
     - name: http
       port: 8000

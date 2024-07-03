@@ -1,3 +1,4 @@
+
 apiVersion: v1
 kind: Secret
 metadata:
@@ -7,7 +8,6 @@ data:
   CARS_DB_USERNAME: Y2FyX3VzZXI=
   CARS_DB_PASSWORD: Y2FyX3Bhc3N3ZA==
   CARS_DB_DATABASE: Y2FyX2Ri
-  MANUFACTURER_SERVICE_HOST_URL: 
 
 ---
 apiVersion: apps/v1

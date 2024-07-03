@@ -1,4 +1,12 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cars-propierties
+data:
+  MANUFACTURER_SERVICE_HOST_URL: "http://manufacturers-service:8000/api/v1/manufacturers/"
+
+---
+apiVersion: v1
 kind: Secret
 metadata:
   name: cars-secret
@@ -34,6 +42,11 @@ spec:
               secretKeyRef:
                 name: cars-secret
                 key: CARS_DB_URI
+          - name: MANUFACTURER_SERVICE_HOST_URL
+            valueFrom:
+              configMapKeyRef:
+                name: cars-propierties
+                key: MANUFACTURER_SERVICE_HOST_URL
           ports:
             - containerPort: 8000
 

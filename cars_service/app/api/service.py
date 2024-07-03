@@ -3,7 +3,7 @@ import os
 
 import httpx
 
-MANUFACTURER_SERVICE_HOST_URL = "http://localhost:8002/api/v1/manufacturer/"
+MANUFACTURER_SERVICE_HOST_URL = "http://localhost:8002/api/v1/manufacturers/"
 url = os.environ.get("MANUFACTURER_SERVICE_HOST_URL", MANUFACTURER_SERVICE_HOST_URL)
 
 
