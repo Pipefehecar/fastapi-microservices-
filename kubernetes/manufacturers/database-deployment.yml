@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: manufacturers-postgres-secret
+type: Opaque
+data:
+  MANUFACTURERS_DB_USERNAME: bWFudWZhY3R1cmVyX3VzZXI=
+  MANUFACTURERS_DB_PASSWORD: bWFudWZhY3R1cmVyX3Bhc3N3ZA==
+  MANUFACTURERS_DB_DATABASE: bWFudWZhY3R1cmVyX2Ri
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: manufacturers-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: manufacturers-postgres
+  template:
+    metadata:
+      labels:
+        app: manufacturers-postgres
+    spec:
+      containers:
+        - name: manufacturers-postgres
+          image: postgres
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: manufacturers-postgres-secret
+                  key: MANUFACTURERS_DB_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: manufacturers-postgres-secret
+                  key: MANUFACTURERS_DB_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: manufacturers-postgres-secret
+                  key: MANUFACTURERS_DB_DATABASE
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: manufacturers-postgres-service
+spec:
+  selector:
+    app: manufacturers-postgres
+  ports:
+    - name: manufacturers-postgres-service-port
+      port: 5432
+      targetPort: 5432

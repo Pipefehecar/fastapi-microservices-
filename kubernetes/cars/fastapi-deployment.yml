@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cars-secret
+  labels:
+    app: cars-secret
+data:
+  CARS_DB_URI : cG9zdGdyZXNxbDovL2Nhcl91c2VyOmNhcl9wYXNzd2RAY2Fycy1wb3N0Z3Jlcy1zZXJ2aWNlOjU0MzIvY2FyX2Ri
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cars-microservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cars-microservice
+  template:
+    metadata:
+      labels:
+        app: cars-microservice
+    spec:
+      containers:
+        - name: cars-microservice
+          image: cars/app # todo: upload to dockerhub
+          imagePullPolicy: Never    # set this to use local docker images.
+
+          env:
+          - name: DATABASE_URI
+            # value: "postgresql://fastapi_user:fastapi_passwd@postgres-service:5432/fastapi_db"
+            valueFrom:
+              secretKeyRef:
+                name: cars-secret
+                key: CARS_DB_URI
+          ports:
+            - containerPort: 8000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cars-service
+spec:
+  type: ClusterIP
+  selector:
+    app: cars-microservice
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP

@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: manufacturers-secret
+  labels:
+    app: manufacturers-secret
+data:
+  MANUFACTURERS_DB_URI : cG9zdGdyZXNxbDovL21hbnVmYWN0dXJlcl91c2VyOm1hbnVmYWN0dXJlcl9wYXNzd2RAbWFudWZhY3R1cmVycy1wb3N0Z3Jlcy1zZXJ2aWNlOjU0MzIvbWFudWZhY3R1cmVyX2Ri
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: manufacturers-microservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: manufacturers-microservice
+  template:
+    metadata:
+      labels:
+        app: manufacturers-microservice
+    spec:
+      containers:
+        - name: manufacturers-microservice
+          image: manufacturers/app # todo: upload to dockerhub
+          imagePullPolicy: Never    # set this to use local docker images.
+
+          env:
+          - name: DATABASE_URI
+            # value: "postgresql://fastapi_user:fastapi_passwd@postgres-service:5432/fastapi_db"
+            valueFrom:
+              secretKeyRef:
+                name: manufacturers-secret
+                key: MANUFACTURERS_DB_URI
+          ports:
+            - containerPort: 8000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: manufacturers-service
+spec:
+  type: ClusterIP
+  selector:
+    app: manufacturers-service
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
